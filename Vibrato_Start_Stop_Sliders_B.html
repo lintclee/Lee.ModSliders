@@ -7,15 +7,19 @@
     <body>
         <button id = "Start1">Start1</button>
         <button id = "Stop1">Stop1</button>
-        <input id = "Modulator1" type="range" min="0" max="1000" step="10" value="0.0"><label id="Modulator1">Modulator_1</label>
-        <input id = "Index1" type="range" min="0" max="100" step="1" value="0.0"><label id="Index1">Index_1</label>
-         <script>
+        <input id = "ModAmt1" type="range" min="400" max="4000" step="1" value="100"><label id="ModAmt1Display">Osc1 Mod Amount</label>
+        <input id = "ModFreq1" type="range" min="55" max="880" step="55" value="220"><label id="ModFreq1Display">Osc1 Mod Freq</label>
+        <input id = "ModAmt2" type="range" min="6" max="80" step="0.5" value="20"><label id="ModAmt2Display">Osc2 Mod Amount</label>
+        <input id = "ModFreq2" type="range" min="0.1" max="19" step="0.1" value="5"><label id="ModFreq2Display">Osc2 Mod Freq</label>
+        <input id = "ModAmt3" type="range" min="20" max="4000" step="10" value ="50"><label id="ModAmt3Display">Osc3 Mod Amount</label>
+        <input id = "ModFreq3" type="range" min="55" max="1760" step = "27.5" value = "440"><label id = "ModFreq3Display">Osc3 Mod Freq</label>
+        <input id = "lowpassCO" type = "range" min="20" max="60" step="0.1" value = "30"><label id = "lowpassDisplay">Cutoff</label>
+          <script>
  
 const ctx = new AudioContext();
 
 let osc1, mod, filterMod
 document.querySelector("#Start1").onclick = () =>
-
 {
  
 //Set up Frequency Modulation Tone
@@ -23,18 +27,40 @@ osc1 = new OscillatorNode(ctx);
 osc1.frequency.value = 220;
 osc1.type = "sine";
 
-const osc1Gain = new GainNode(ctx);
-osc1Gain.gain.value = 0.1;
+osc2 = new OscillatorNode(ctx);
+osc2.frequency.value = 660;
+osc2.type = "sine";
+
+osc3 = new OscillatorNode(ctx);
+osc3.frequency.value = 440;
+osc3.type = "sine";
 
 
+const oscGain = new GainNode(ctx);
+oscGain.gain.value = 0.1;
 
 
-mod = new OscillatorNode(ctx);
-mod.type = "sine"
-mod.frequency.value = 55; // modulator value
+mod1 = new OscillatorNode(ctx);
+mod1.type = "triangle"
+mod1.frequency.value = 55; // modulator value
 
-const modulatorGain = new GainNode(ctx);
-modulatorGain.gain.value = 4000; // Index or strength of harmonics
+const modulatorGain1 = new GainNode(ctx);
+modulatorGain1.gain.value = 4000; // Index or strength of harmonics
+
+mod2 = new OscillatorNode(ctx);
+mod2.type = "square"
+mod2.frequency.value = 55; // modulator value
+
+const modulatorGain2 = new GainNode(ctx);
+modulatorGain2.gain.value = 4000;
+
+mod3 = new OscillatorNode(ctx);
+mod3.type = "sine"
+mod3.frequency.value = 55; // modulator value
+
+const modulatorGain3 = new GainNode(ctx);
+modulatorGain3.gain.value = 4000;
+
 
 //Set up Oscillating Filter
 
@@ -45,10 +71,10 @@ filter.Q.value = 20;
 
 filterMod = new OscillatorNode(ctx);
 filterMod.frequency.value = 0.5;
-filterMod.type = "square";
+filterMod.type = "sine";
 
 const filterModGain = new GainNode(ctx);
-filterModGain.gain.value = 1000
+filterModGain.gain.value = 300
 
 
 //connect everything up
@@ -56,36 +82,79 @@ filterModGain.gain.value = 1000
 filterMod.connect(filterModGain);
 filterModGain.connect(filter.frequency)
 
-osc1.connect(osc1Gain);
+osc1.connect(oscGain);
+osc2.connect(oscGain);
+osc3.connect(oscGain);
 
-mod.connect(modulatorGain);
-modulatorGain.connect(osc1.frequency);
+mod1.connect(modulatorGain1);
+modulatorGain1.connect(osc1.frequency);
 
+mod2.connect(modulatorGain2);
+modulatorGain2.connect(osc2.frequency);
 
-osc1Gain.connect(filter);
+mod3.connect(modulatorGain3);
+modulatorGain3.connect(osc3.frequency);
+
+oscGain.connect(filter);
 filter.connect(ctx.destination);
-
-const slider1 = document.querySelector("#Modulator1");
-        slider1.addEventListener("input", () => {
-            ctx.resume();
-        modulatorGain.gain.value = Number(slider1.value);
-        document.querySelector("Modulator1").textContent = slider1.value;
-
-});
-
- const slider2 = document.querySelector("#Index1");
-        slider2.addEventListener("input", () => {
-            ctx.resume();
-        mod.frequency.value = Number(slider2.value);
-        document.querySelector("Modulator1").textContent = slider2.value;
-
-});
-
-
 osc1.start();
-mod.start();
+osc2.start();
+osc3.start();
+mod1.start();
+mod2.start();
+mod3.start();
 filterMod.start();
 
+const slider1 = document.querySelector("#ModAmt1");
+        slider1.addEventListener("input", () => {
+            ctx.resume();
+        modulatorGain1.gain.value = Number(slider1.value);
+        document.querySelector("#ModAmt1Display").textContent = slider1.value;
+
+});
+
+ const slider2 = document.querySelector("#ModFreq1");
+        slider2.addEventListener("input", () => {
+            ctx.resume();
+        mod1.frequency.value = Number(slider2.value);
+        document.querySelector("#ModFreq1Display").textContent = slider2.value;
+        });
+
+const slider3 = document.querySelector("#ModAmt2");
+        slider3.addEventListener("input", () => {
+            ctx.resume();
+        modulatorGain2.gain.value = Number(slider3.value)**2;
+        document.querySelector("#ModAmt2Display").textContent = slider3.value;
+
+});
+
+ const slider4 = document.querySelector("#ModFreq2");
+        slider4.addEventListener("input", () => {
+            ctx.resume();
+        mod2.frequency.value = Number(slider4.value);
+        document.querySelector("#ModFreq2Display").textContent = ((slider4.value)**2);
+
+
+});
+const slider5 = document.querySelector("#ModAmt3")
+    slider5.addEventListener("input", () => {   
+    ctx.resume();
+    mod3.frequency.value = Number(slider5.value);
+    document.querySelector("#ModAmt3Display").textContent = slider5.value;
+
+});
+const slider6 = document.querySelector("#ModFreq3")
+    slider6.addEventListener("input", () => {
+        ctx.resume();
+        modulatorGain3.gain.value = Number(slider6.value);
+        document.querySelector("#ModFreq3Display").textContent = slider6.value;
+    });
+const slider7 = document.querySelector("#lowpassCO")
+slider7.addEventListener("input", () => {
+    ctx.resume();
+    filter.frequency.value = Number((slider7.value)**2);
+    document.querySelector("#lowpassDisplay").textContent = slider7.value;
+})
 }
 
 document.querySelector("#Stop1").onclick = () =>
@@ -93,7 +162,11 @@ document.querySelector("#Stop1").onclick = () =>
 {
 
 osc1.stop();
-mod.stop();
+osc2.stop();
+osc3.stop();
+mod1.stop();
+mod2.stop();
+mod3.stop();
 filterMod.stop();
 
 }
